@@ -1,13 +1,58 @@
+// General, Mobile, AnimationSetter
+
+// la pantalla se mide y se aplincan cosas distintas
+
 class Page {
 
     constructor() {
-        this.isMobile = window.innerWidth < 600;
-        this.__nav = document.querySelector("nav");
-        this.__header = document.querySelector("header");
-        this.__dropdownLinkList = document.querySelectorAll(".list");
+        this.nav = document.querySelector("nav");
+        this.menuButton = document.createElement("button");
+        this.links = document.querySelector(".links");
+        this.dropdownLinks = document.querySelectorAll(".list");
+        this.header = document.querySelector("header");
     }
 
-    __getDropdownSublinkWidth(links) {
+    createMenuButton() {
+        const button = document.createElement("button");
+        button.classList.add("mobile-nav")
+        button.innerHTML = `
+            <span class="line top"></span>
+            <span class="line middle"></span>
+            <span class="line bottom"></span>
+        `;
+        return button;
+    }
+
+    animateNav(scroll) {
+        if(scroll > this.header.offsetHeight * 1) {
+            this.nav.classList.remove("removing-nav");
+            this.nav.classList.add("fixed-nav");
+        } else {    
+            this.nav.classList.remove("fixed-nav")
+            this.nav.classList.add("removing-nav");
+        }
+    }
+
+    listenScroll() {
+        let scroll = window.scrollY;
+        this.animateNav(scroll);
+        document.addEventListener("scroll", (event) => {
+            scroll = window.scrollY;
+            this.animateNav(scroll);
+        })
+    }
+
+    unmountMobileNav() {
+        this.nav.classList.remove("mobile");
+        this.nav.remove(this.menuButton);
+    }
+
+    mountMobileNav() {
+        this.nav.classList.add("mobile");
+        this.nav.append(this.menuButton);
+    }
+
+    filterMaxWidthInChar(links) {
         const charQuantity = [];
         links.forEach(element => charQuantity.push(element.innerText.length))
         const maxChars = Math.max(...charQuantity);
@@ -15,20 +60,10 @@ class Page {
         return widthCh;
     }
 
-    __applyNavAnimation(scroll) {
-        if(scroll > this.__header.offsetHeight * 0.8) {
-            this.__nav.classList.remove("removing-nav");
-            this.__nav.classList.add("fixed-nav");
-        } else {    
-            this.__nav.classList.remove("fixed-nav")
-            this.__nav.classList.add("removing-nav");
-        }
-    }
-
-    applyDropdownAnimations() {
-        this.__dropdownLinkList.forEach(element => {
+    mountDropdownAnimations() {
+        this.dropdownLinks.forEach(element => {
             const links = element.querySelectorAll("a");
-            const widthCh = this.__getDropdownSublinkWidth(links);
+            const width = this.filterMaxWidthInChar(links);
 
             links.forEach((subElement, index) => {
                 if(index == 0)
@@ -37,47 +72,32 @@ class Page {
                     subElement.classList.add("last")
 
                 subElement.style.setProperty("animation-delay", `${(index + 1) * 24}ms`)
-                subElement.style.setProperty("width", `${widthCh}ch`)
-                subElement.style.setProperty("margin-left", `-${widthCh/2}ch`)
+                subElement.style.setProperty("width", `${width}ch`)
+                subElement.style.setProperty("margin-left", `-${width / 2}ch`)
             })
         })
     }
 
-    addScrollNavListener() {
-        let scroll = window.scrollY;
-        this.__applyNavAnimation(scroll);
-        document.addEventListener("scroll", (event) => {
-            scroll = window.scrollY;
-            this.__applyNavAnimation(scroll);
-        })
-    }
+    listenResize() {
 
-    __createNavButton() {
-        const button = document.createElement("button");
-        button.innerHTML = "<a>Menu</a>";
-        return button;
-    }
-
-    mountMobileNav() {
-        console.log("mount");
-        const button = this.__createNavButton();
-        this.__nav.append(button);
-        console.log("success");
+        document.addEventListener("resize", () => {
+            const width = window.innerWidth;
+            if(width < 600) this.mountMobileNav();
+            if(width > 600) this.unmountMobileNav();
+        });
     }
 
     main() {
-        this.applyDropdownAnimations();
-        this.addScrollNavListener();
+        this.mountDropdownAnimations();
         
-        console.log(`size ${this.isMobile}`);
-        if(this.isMobile) {
-            this.mountMobileNav();
-        } else console.log("no entry")
+        this.listenScroll();
+        this.listenResize();
     }
 
     static init() {
         const page = new Page();
-        page.main()
+        page.main();
+        return page;
     }
 
 }
