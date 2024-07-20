@@ -440,6 +440,10 @@ main section div.product {
     transition: 240ms;
 }
 
+main section div.product h3 {
+    margin: 0;
+}
+
 main section div.product img {
     aspect-ratio: 1;
     width: 100%;
@@ -458,6 +462,7 @@ main section div.product div.data p {
     margin: 0;
     font-family: roboto;
     font-size: 1em;
+    text-align: left;
 }
 
 main section div.product button {
@@ -536,6 +541,11 @@ footer div.content section.legal a {
     line-height: 1.4em;
 }
 
+/*categorias*/
+
+body#categorias-cuerpo main {
+    
+}
 
 @media (max-width: 560px) {
     body {
